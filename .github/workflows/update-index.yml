@@ -1,0 +1,47 @@
+name: Ежедневное обновление index.html
+
+on:
+  schedule:
+    # 09:00 по времени Калининграда (UTC+2) = 07:00 UTC
+    - cron: '0 7 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-index
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    env:
+      # Публичная ссылка Яндекс.Диска на index.html.
+      # Можно переопределить переменной репозитория DISK_URL (Settings -> Secrets and variables -> Actions).
+      DISK_URL: "https://yadi.sk/d/5RnR7YlsxvDWmw"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Скачать свежий index.html с Яндекс.Диска
+        run: |
+          curl -sS -f -G \
+            "https://cloud-api.yandex.net/v1/disk/public/resources/download" \
+            --data-urlencode "public_key=${DISK_URL}" \
+            -o meta.json
+          HREF=$(python3 -c "import json,sys; print(json.load(open('meta.json'))['href'])")
+          curl -sS -f -L "$HREF" -o index.html
+          rm meta.json
+          echo "Файл скачан: $(wc -c < index.html) байт"
+
+      - name: Коммит, если файл изменился
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git diff --quiet -- index.html; then
+            echo "Изменений нет — коммит не нужен"
+          else
+            git add index.html
+            git commit -m "Auto-update index.html from Yandex Disk ($(date -u +'%Y-%m-%d %H:%M UTC'))"
+            git push
+          fi
