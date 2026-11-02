@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Калининград — Дашборды</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+    color: #fff;
+    padding: 40px 20px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .header h1 {
+    font-size: 2.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+    text-shadow: 0 2px 12px rgba(0,0,0,.4);
+  }
+
+  .header p {
+    font-size: 1.05rem;
+    opacity: .75;
+    font-weight: 300;
+  }
+
+  .divider {
+    width: 70px;
+    height: 3px;
+    background: linear-gradient(90deg, #4facfe, #43e97b);
+    border-radius: 3px;
+    margin: 20px auto 0;
+  }
+
+  .cards {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 1000px;
+  }
+
+  .card {
+    position: relative;
+    width: 380px;
+    max-width: 90vw;
+    min-height: 340px;
+    border-radius: 24px;
+    padding: 40px 36px;
+    text-decoration: none;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: transform .35s cubic-bezier(.2,.8,.3,1), box-shadow .35s;
+    box-shadow: 0 10px 40px rgba(0,0,0,.35);
+  }
+
+  .card:hover {
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 0%, rgba(255,255,255,.18), transparent 55%);
+    pointer-events: none;
+  }
+
+  .card-megapolis {
+    background: linear-gradient(150deg, #1e3c72 0%, #2a5298 60%, #4776b9 100%);
+  }
+
+  .card-baucenter {
+    background: linear-gradient(150deg, #b3441e 0%, #d9611f 55%, #f0a035 100%);
+  }
+
+  .card .icon {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.16);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.2rem;
+    margin-bottom: 26px;
+    border: 1px solid rgba(255,255,255,.25);
+  }
+
+  .card h2 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .card .desc {
+    font-size: .98rem;
+    line-height: 1.55;
+    opacity: .88;
+    flex-grow: 1;
+  }
+
+  .card .tags {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 22px 0;
+  }
+
+  .tag {
+    font-size: .75rem;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.25);
+    letter-spacing: .4px;
+  }
+
+  .card .open {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    font-size: .95rem;
+    opacity: .95;
+  }
+
+  .card .open .arrow {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #fff;
+    color: #1e3c72;
+    font-size: 1.05rem;
+    transition: transform .3s;
+  }
+
+  .card-baucenter .open .arrow { color: #b3441e; }
+
+  .card:hover .open .arrow { transform: translateX(6px); }
+
+  .footer {
+    margin-top: 60px;
+    font-size: .8rem;
+    opacity: .5;
+    letter-spacing: .5px;
+  }
+
+  @media (max-width: 860px) {
+    .header h1 { font-size: 1.9rem; }
+    .header { margin-bottom: 40px; }
+    .cards { gap: 24px; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>Калининград · Дашборды</h1>
+    <p>Оперативная аналитика по сети магазинов</p>
+    <div class="divider"></div>
+  </div>
+
+  <div class="cards">
+
+    <a class="card card-megapolis" href="https://resantakld.github.io/megapolis-dashboard/" target="_blank" rel="noopener">
+      <div class="icon">🏙️</div>
+      <h2>Мегаполис</h2>
+      <div class="desc">
+        Остатки и продажи по ТЦ сети «Мегаполис-Балтика»: Балтийск, Советск,
+        Черняховск, Мира, Емельянова-Энергетиков, Камская. Товар в пути по УПД,
+        ассортимент и автозаказ.
+      </div>
+      <div class="tags">
+        <span class="tag">ОСТАТКИ</span>
+        <span class="tag">ПРОДАЖИ</span>
+        <span class="tag">УПД «В ПУТИ»</span>
+        <span class="tag">ЗАКАЗ</span>
+      </div>
+      <div class="open"><span class="arrow">→</span> Открыть дашборд</div>
+    </a>
+
+    <a class="card card-baucenter" href="https://resantakld.github.io/baucenter/" target="_blank" rel="noopener">
+      <div class="icon">🛠️</div>
+      <h2>Бауцентр</h2>
+      <div class="desc">
+        Дашборд «Сад» по выгрузкам 4Send: продажи и остатки садовой продукции,
+        динамика по периодам, анализ товарных групп.
+      </div>
+      <div class="tags">
+        <span class="tag">ДАШБОРД «САД»</span>
+        <span class="tag">4SEND</span>
+        <span class="tag">ПРОДАЖИ</span>
+      </div>
+      <div class="open"><span class="arrow">→</span> Открыть дашборд</div>
+    </a>
+
+  </div>
+
+  <div class="footer">Калининград · обновляется через AI-ассистента</div>
+
+</body>
+</html>
