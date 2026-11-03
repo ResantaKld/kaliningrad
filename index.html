@@ -22,6 +22,7 @@
   .header {
     text-align: center;
     margin-bottom: 60px;
+    position: relative;
   }
 
   .header h1 {
@@ -45,6 +46,23 @@
     border-radius: 3px;
     margin: 20px auto 0;
   }
+
+  .logout-btn {
+    position: absolute;
+    top: -8px;
+    right: -40px;
+    background: rgba(255,255,255,.12);
+    border: 1px solid rgba(255,255,255,.25);
+    color: #fff;
+    font-size: .8rem;
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background .25s;
+    display: none;
+  }
+
+  .logout-btn:hover { background: rgba(255,255,255,.25); }
 
   .cards {
     display: flex;
@@ -173,19 +191,129 @@
     letter-spacing: .5px;
   }
 
+  /* ===== Вход ===== */
+  #login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 25, 35, .82);
+    backdrop-filter: blur(8px);
+  }
+
+  #login-card {
+    width: 360px;
+    max-width: 92vw;
+    background: #fff;
+    color: #1c2b36;
+    border-radius: 20px;
+    padding: 36px 32px 30px;
+    box-shadow: 0 24px 70px rgba(0,0,0,.5);
+  }
+
+  #login-card h2 {
+    font-size: 1.35rem;
+    text-align: center;
+    margin-bottom: 6px;
+  }
+
+  #login-card .sub {
+    text-align: center;
+    font-size: .85rem;
+    color: #7a8a94;
+    margin-bottom: 24px;
+  }
+
+  #login-card label {
+    display: block;
+    font-size: .8rem;
+    font-weight: 600;
+    color: #5a6b76;
+    margin: 0 0 6px 2px;
+  }
+
+  #login-card input {
+    width: 100%;
+    padding: 12px 14px;
+    font-size: .95rem;
+    border: 1.5px solid #d7dfe5;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color .2s;
+    background: #f8fafb;
+  }
+
+  #login-card input:focus { border-color: #2a5298; background: #fff; }
+
+  #login-btn {
+    width: 100%;
+    padding: 13px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(90deg, #1e3c72, #2a5298);
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity .2s, transform .15s;
+  }
+
+  #login-btn:hover { opacity: .92; }
+  #login-btn:active { transform: scale(.98); }
+
+  #login-error {
+    display: none;
+    margin-top: 14px;
+    text-align: center;
+    font-size: .85rem;
+    color: #c0392b;
+    background: #fdecea;
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+
+  #login-loading {
+    display: none;
+    margin-top: 14px;
+    text-align: center;
+    font-size: .8rem;
+    color: #7a8a94;
+  }
+
   @media (max-width: 1180px) {
     .header h1 { font-size: 1.9rem; }
     .header { margin-bottom: 40px; }
     .cards { gap: 24px; }
+    .logout-btn { right: -10px; top: -46px; }
   }
 </style>
 </head>
 <body>
 
+  <div id="login-overlay">
+    <div id="login-card">
+      <h2>🔐 Вход на дашборды</h2>
+      <div class="sub">Калининград · доступ по учётной записи</div>
+      <form id="login-form" autocomplete="off">
+        <label for="login-user">Логин</label>
+        <input type="email" id="login-user" placeholder="name@resanta.ru" required>
+        <label for="login-pass">Пароль</label>
+        <input type="password" id="login-pass" placeholder="••••••••" required>
+        <button type="submit" id="login-btn">Войти</button>
+      </form>
+      <div id="login-error">Неверный логин или пароль</div>
+      <div id="login-loading">Проверяем…</div>
+    </div>
+  </div>
+
   <div class="header">
     <h1>Калининград · Дашборды</h1>
     <p>Оперативная аналитика по сети магазинов</p>
     <div class="divider"></div>
+    <button id="logout-btn" class="logout-btn" type="button">Выйти</button>
   </div>
 
   <div class="cards">
@@ -240,6 +368,80 @@
   </div>
 
   <div class="footer">Калининград · обновляется через AI-ассистента</div>
+
+<script>
+(function () {
+  'use strict';
+
+  var DASH_USERS = {
+    'schudro_ma@resanta.ru':  'a7d3b7ce5f543569a9ddf38d69e3d879bdfe4760cfdab68a3f2ad4c1bea3d14f',
+    'golovanov_am@resanta.ru':'cbd0fbb04e60bd792725181e13fd49d8986f714c57e8b619f6b367ee322f7a6e'
+  };
+  var SALT = 'MGB-2026::';
+
+  var overlay = document.getElementById('login-overlay');
+  var form = document.getElementById('login-form');
+  var userIn = document.getElementById('login-user');
+  var passIn = document.getElementById('login-pass');
+  var errBox = document.getElementById('login-error');
+  var loadBox = document.getElementById('login-loading');
+  var logoutBtn = document.getElementById('logout-btn');
+
+  function sha256Hex(text) {
+    return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+      .then(function (buf) {
+        return Array.prototype.map.call(new Uint8Array(buf), function (b) {
+          return ('0' + b.toString(16)).slice(-2);
+        }).join('');
+      });
+  }
+
+  function unlock() {
+    overlay.style.display = 'none';
+    logoutBtn.style.display = 'block';
+  }
+
+  function check() {
+    if (typeof crypto === 'undefined' || !crypto.subtle) return;
+    if (sessionStorage.getItem('dashAuth')) unlock();
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    errBox.style.display = 'none';
+    loadBox.style.display = 'block';
+    var login = userIn.value.trim().toLowerCase();
+    var pass = passIn.value;
+    if (!DASH_USERS[login]) {
+      loadBox.style.display = 'none';
+      errBox.style.display = 'block';
+      return;
+    }
+    sha256Hex(SALT + pass).then(function (hash) {
+      loadBox.style.display = 'none';
+      if (hash === DASH_USERS[login]) {
+        sessionStorage.setItem('dashAuth', login);
+        unlock();
+      } else {
+        errBox.style.display = 'block';
+      }
+    }).catch(function () {
+      loadBox.style.display = 'none';
+      errBox.textContent = 'Не удалось проверить вход: нужен современный браузер и соединение по https';
+      errBox.style.display = 'block';
+    });
+  });
+
+  logoutBtn.addEventListener('click', function () {
+    sessionStorage.removeItem('dashAuth');
+    overlay.style.display = 'flex';
+    logoutBtn.style.display = 'none';
+    passIn.value = '';
+  });
+
+  check();
+})();
+</script>
 
 </body>
 </html>
